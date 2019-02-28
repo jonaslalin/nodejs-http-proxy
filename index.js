@@ -6,35 +6,33 @@ const { hostname: proxyHostname, port: proxyPort } = urlParse(
   process.env['HTTP_PROXY']
 );
 
-const handleError = ({ response, error, statusCode }) => {
+function handleError({ response, error, statusCode }) {
   console.error('error', error);
   response.statusCode = statusCode;
   response.end();
-};
+}
 
-const defaultModifyProxyRequest = ({ proxyRequest }) => {
+function defaultModifyProxyRequest({ proxyRequest }) {
   proxyRequest.end();
-};
+}
 
-const defaultModifyResponse = ({ response, proxyResponse }) => {
+function defaultModifyResponse({ response, proxyResponse }) {
   proxyResponse.pipe(response);
-};
+}
 
-const proxyRequest = ({
+function proxyRequest({
   request,
   response,
   url,
   modifyProxyRequest = defaultModifyProxyRequest,
   modifyResponse = defaultModifyResponse
-}) => {
+}) {
   const { host, path } = urlParse(url);
   const proxyRequest = httpRequest({
     hostname: proxyHostname,
     port: proxyPort,
-    path: path,
-    headers: {
-      host: host
-    }
+    path,
+    headers: { host }
   })
     .on('error', error => {
       handleError({ response, statuscode: 500, error });
@@ -51,7 +49,7 @@ const proxyRequest = ({
       });
     });
   modifyProxyRequest({ request, proxyRequest });
-};
+}
 
 createServer()
   .on('request', (request, response) => {
@@ -74,7 +72,7 @@ createServer()
         request,
         response,
         url: 'http://example.com',
-        modifyResponse: ({ reponse, proxyResponse }) => {
+        modifyResponse({ proxyResponse }) {
           proxyResponse
             .pipe(
               new Transform({
