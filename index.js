@@ -6,7 +6,7 @@ const { hostname: proxyHostname, port: proxyPort } = urlParse(
   process.env['HTTP_PROXY']
 );
 
-function handleError({ response, error, statusCode }) {
+function handleError({ response, statusCode, error }) {
   console.error('error', error);
   response.statusCode = statusCode;
   response.end();
@@ -35,11 +35,11 @@ function proxyRequest({
     headers: { host }
   })
     .on('error', error => {
-      handleError({ response, statuscode: 500, error });
+      handleError({ response, statusCode: 500, error });
     })
     .on('response', proxyResponse => {
       proxyResponse.on('error', error => {
-        handleError({ response, statuscode: 500, error });
+        handleError({ response, statusCode: 500, error });
       });
       modifyResponse({
         request,
@@ -54,7 +54,7 @@ function proxyRequest({
 createServer()
   .on('request', (request, response) => {
     request.on('error', error => {
-      handleError({ response, statuscode: 400, error });
+      handleError({ response, statusCode: 400, error });
     });
     response.on('error', error => {
       console.error('error', error);
@@ -96,7 +96,7 @@ createServer()
               })
             )
             .on('error', error => {
-              handleError({ response, statuscode: 500, error });
+              handleError({ response, statusCode: 500, error });
             })
             .pipe(response);
         }
