@@ -3,7 +3,7 @@ const { parse: urlParse } = require('url');
 const { Transform } = require('stream');
 
 const { hostname: proxyHostname, port: proxyPort } = urlParse(
-  process.env['HTTP_PROXY']
+  process.env['HTTP_PROXY'] || ''
 );
 
 function handleError({ response, statusCode, error }) {
@@ -29,8 +29,8 @@ function proxyRequest({
 }) {
   const { host, path } = urlParse(url);
   const proxyRequest = httpRequest({
-    hostname: proxyHostname,
-    port: proxyPort,
+    hostname: proxyHostname || host,
+    port: proxyPort || 80,
     path,
     headers: { host }
   })
